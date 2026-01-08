@@ -42,7 +42,7 @@ def get_pr_diff(pr_url: str) -> dict:
         if len(path_parts) < 4 or path_parts[2] != "pull":
             raise ValueError("Invalid PR URL format.")
         owner, _, _, pr_number = path_parts[:4]
-        diff_url = pr_url + ".diff"
+        diff_url = pr_url.rstrip("/") + ".diff"
         headers = {"Authorization": f"token {GITHUB_TOKEN}"}
         resp = requests.get(diff_url, headers=headers)
         resp.raise_for_status()
