@@ -1,0 +1,39 @@
+# --- Security (CRITICAL) ---
+# Nikada, ali bas nikada ne commituj ovo
+.env
+.env.local
+*.key
+secrets.json
+
+# --- Python & Runtime ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# --- Virtual Environments ---
+# Ignorisi sve varijante imena za venv
+env/
+venv/
+.env/
+.venv/
+
+# --- IDE Settings (Team Conflict Prevention) ---
+.vscode/
+.idea/
+*.swp
+
+# --- OS Junk ---
+.DS_Store
+Thumbs.db
+
+# --- Logs & Databases ---
+*.log
+# Ako koristite SQLite za LangGraph checkpointing u buducnosti
+*.sqlite3
+checkpoints/
+
+# --- Testing ---
+.pytest_cache/
+htmlcov/
+.coverage

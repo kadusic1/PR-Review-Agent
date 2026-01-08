@@ -1,0 +1,18 @@
+# --- Core AI Framework ---
+# Koristimo 0.3.x jer je najstabilnija za moderni Graph pristup
+langchain~=0.3.0
+langchain-core~=0.3.0
+langchain-community~=0.3.0
+
+# --- Orchestration ---
+# LangGraph se brzo mijenja, pinujemo na 0.2 seriju da izbjegnemo breaking changes
+langgraph~=0.2.10
+
+# --- LLM Provider (Groq) ---
+# Mora biti kompatibilan sa novim LangChainom
+langchain-groq~=0.2.0
+
+# --- Tools & Data ---
+PyGithub~=2.4.0      # Za GitHub API
+pydantic~=2.9.0      # Za validaciju podataka (JSON output)
+python-dotenv~=1.0.0 # Za environment varijable
