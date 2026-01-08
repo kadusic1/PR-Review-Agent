@@ -22,7 +22,7 @@ if not GITHUB_TOKEN:
 g = Github(GITHUB_TOKEN)
 
 
-def get_pr_diff(pr_url: str) -> str:
+def get_pr_diff(pr_url: str) -> dict:
     """
     Fetches the raw diff of a pull request from GitHub and returns owner, PR id, and diff.
 
