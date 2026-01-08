@@ -27,6 +27,8 @@ def get_pr_diff(pr_url: str) -> str:
             # result = {"owner": "octocat", "pr_id": 1347, "diff": "..."}
     """
     parsed = urlparse(pr_url)
+    if parsed.scheme != "https" or parsed.netloc.lower() != "github.com":
+        raise ValueError("PR URL must be from github.com.")
     path_parts = parsed.path.strip("/").split("/")
     if len(path_parts) < 4 or path_parts[2] != "pull":
         raise ValueError("Invalid PR URL format.")
@@ -51,6 +53,8 @@ def post_comment(pr_url: str, comment_body: str):
             post_comment("https://github.com/octocat/Hello-World/pull/1347", "Nice work!")
     """
     parsed = urlparse(pr_url)
+    if parsed.scheme != "https" or parsed.netloc.lower() != "github.com":
+        raise ValueError("PR URL must be from github.com.")
     path_parts = parsed.path.strip("/").split("/")
     if len(path_parts) < 4 or path_parts[2] != "pull":
         raise ValueError("Invalid PR URL format.")
