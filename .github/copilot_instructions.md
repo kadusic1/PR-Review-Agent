@@ -16,3 +16,11 @@ Focus on a **Supervisor Architecture** where an Orchestrator routes tasks to wor
 ## 3. Models Strategy
   - Use `os.getenv("MODEL_HEAVY")` (Llama 3.3 70B) for: Orchestrator, Logic Analysis, Complex Reasoning.
   - Use `os.getenv("MODEL_FAST")` (Llama 3.1 8B) for: Style Checks, Formatting, Simple Tools.
+
+## 4. Docstrings
+  - Every function will have Google styled docstrings with 'Args', 'Returns' and 'Example'.
+
+## 5. Efficiency
+  - Always minimize LOC and increase code readability so that everyone even at first glance
+  understands it.
+
