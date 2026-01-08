@@ -30,14 +30,12 @@ if __name__ == "__main__":
         print("Nema API kljuca!")
         exit(1)
 
-    
     test_model(
         "MOZAK (Llama 3.3 70B)",
         "llama-3.3-70b-versatile",
         "Napisi jednu kratku recenicu o kvantnoj fizici.",
     )
 
-    
     test_model(
         "BRZINAC (Llama 3.1 8B)",
         "llama-3.1-8b-instant",
