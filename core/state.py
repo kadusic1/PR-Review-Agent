@@ -30,13 +30,12 @@ class AgentState(TypedDict):
         ...     "style_comments": [],
         ...     "final_report": "",
         ... }
-        >>> # Agent 1 adds a comment
-        >>> state["logic_comments"] = ["Bug: SQL injection"]
-        >>> # Agent 2 adds another comment
-        >>> state["logic_comments"] = ["Bug: Missing validation"]
-        >>> # Result: Both comments are preserved
-        >>> state["logic_comments"]
-        ["Bug: SQL injection", "Bug: Missing validation"]
+        >>> # Within the LangGraph framework, if Agent 1 returns:
+        >>> # {"logic_comments": ["Bug: SQL injection"]}
+        >>> # and Agent 2 returns:
+        >>> # {"logic_comments": ["Bug: Missing validation"]}
+        >>> # The state will be automatically merged, resulting in:
+        >>> # state["logic_comments"] == ["Bug: SQL injection", "Bug: Missing validation"]
     """
 
     pr_diff: str
