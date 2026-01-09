@@ -37,10 +37,22 @@ logger = logging.getLogger(__name__)
 
 
 def _split_findings(text: str) -> List[str]:
-    """Split an agent output into individual findings.
-    Heuristic-based splitting: splits on common bullet characters. Trims and
-    ignores very short/empty items. Preserves multi-line findings by splitting
-    on bullet separators rather than raw newlines.
+    """
+    Split an agent output into individual findings.
+
+    Heuristic-based splitting: splits on common bullet characters.
+    Trims and ignores very short/empty items. Preserves multi-line findings by
+    splitting on bullet separators rather than raw newlines.
+
+    Args:
+        text (str): The agent output text to split into findings.
+
+    Returns:
+        List[str]: A list of individual findings as strings.
+
+    Example:
+        findings = _split_findings("- Issue one.\n- Issue two.")
+        # findings == ["Issue one.", "Issue two."]
     """
     if not text:
         return []
@@ -63,7 +75,19 @@ def _split_findings(text: str) -> List[str]:
 
 
 def _normalize(item: str) -> str:
-    """Normalize a finding for deduplication."""
+    """
+    Normalize a finding for deduplication.
+
+    Args:
+        item (str): The finding string to normalize.
+
+    Returns:
+        str: The normalized string suitable for deduplication.
+
+    Example:
+        norm = _normalize("  Bug found!  ")
+        # norm == "bug found"
+    """
     s = item.strip()
     s = re.sub(r"\s+", " ", s)
     s = s.lower()
@@ -73,13 +97,21 @@ def _normalize(item: str) -> str:
 
 
 def supervisor_node(state: AgentState) -> dict:
-    """Create a final PR review from accumulated agent comments.
+    """
+    Create a final PR review from accumulated agent comments.
 
     Args:
-            state: Shared AgentState with `logic_comments`, `style_comments`, and `pr_diff`.
+        state (AgentState): Shared AgentState with `logic_comments`, `style_comments`,
+        and `pr_diff`.
 
     Returns:
-            Dict containing `final_report` as a Markdown string.
+        dict: Dict containing `final_report` as a Markdown string.
+
+    Example:
+        state = AgentState(logic_comments=["- Bug found."],
+        style_comments=["- Use snake_case."], pr_diff="diff...")
+        result = supervisor_node(state)
+        # result == {"final_report": "...markdown..."}
     """
     try:
         logic_comments = state.get("logic_comments", []) or []
