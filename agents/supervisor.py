@@ -38,33 +38,28 @@ logger = logging.getLogger(__name__)
 
 def _split_findings(text: str) -> List[str]:
     """Split an agent output into individual findings.
-
-    Heuristic-based splitting: splits on common bullet characters and on
-    paragraph boundaries. Trims and ignores very short/empty items.
+    Heuristic-based splitting: splits on common bullet characters. Trims and
+    ignores very short/empty items. Preserves multi-line findings by splitting
+    on bullet separators rather than raw newlines.
     """
     if not text:
         return []
 
-    # Normalize common bullet separators to newlines
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
-    # Replace bullets like '-', '*', '•' or numbered lists with newline markers
-    text = re.sub(r"(^|\n)\s*[-*•+]\s+", "\n- ", text)
-    text = re.sub(r"(^|\n)\s*\d+\.\s+", "\n- ", text)
+    # Pattern to identify the start of a bullet point item (start of line)
+    bullet_pattern = r"(?:^|\n)\s*(?:[-*•+]|\d+\.)\s+"
 
-    parts = []
-    for line in text.split("\n"):
-        candidate = line.strip()
-        if not candidate:
-            continue
-        # Remove leading dash if present from normalization
-        if candidate.startswith("- "):
-            candidate = candidate[2:].strip()
-        # Ignore tiny fragments that are unlikely to be meaningful
-        if len(candidate) < 12:
-            continue
-        parts.append(candidate)
+    # Use re.split to preserve multi-line findings (each bullet is a delimiter)
+    parts = re.split(bullet_pattern, text)
 
-    return parts
+    findings = []
+    for part in parts:
+        candidate = part.strip()
+        # Ignore empty strings from split and tiny fragments
+        if not candidate or len(candidate) < 12:
+            continue
+        findings.append(candidate)
+
+    return findings
 
 
 def _normalize(item: str) -> str:
@@ -72,6 +67,8 @@ def _normalize(item: str) -> str:
     s = item.strip()
     s = re.sub(r"\s+", " ", s)
     s = s.lower()
+    # Remove punctuation to improve deduplication
+    s = re.sub(r"[^\w\s]", "", s)
     return s
 
 
@@ -89,20 +86,38 @@ def supervisor_node(state: AgentState) -> dict:
         style_comments = state.get("style_comments", []) or []
         pr_diff = state.get("pr_diff", "") or ""
 
-        # Extract individual findings from agent outputs
-        findings: List[str] = []
-        for blob in logic_comments + style_comments:
-            findings.extend(_split_findings(blob))
+        # Support structured findings (dicts) or legacy plain-text strings.
+        # Normalize into a list of dicts: {"category": "logic"|"style", "description": str}
+        all_findings = []
 
-        # Deduplicate while preserving readable order
+        def _ingest(source, category_name):
+            for item in source:
+                if isinstance(item, dict):
+                    desc = item.get("description") or item.get("text") or ""
+                    cat = item.get("category") or category_name
+                    if desc:
+                        all_findings.append({"category": cat, "description": desc})
+                elif isinstance(item, str):
+                    for desc in _split_findings(item):
+                        all_findings.append(
+                            {"category": category_name, "description": desc}
+                        )
+
+        _ingest(logic_comments, "logic")
+        _ingest(style_comments, "style")
+
+        # Deduplicate while preserving readable order (by normalized description)
         seen: Set[str] = set()
-        deduped: List[str] = []
-        for f in findings:
-            key = _normalize(f)
+        deduped: List[dict] = []
+        for f in all_findings:
+            desc = f.get("description", "")
+            key = _normalize(desc)
             if key in seen:
                 continue
             seen.add(key)
-            deduped.append(f)
+            deduped.append(
+                {"category": f.get("category", "style"), "description": desc}
+            )
 
         # If nothing to report, short-circuit with an empty but helpful message
         if not deduped:
@@ -114,12 +129,17 @@ def supervisor_node(state: AgentState) -> dict:
             logger.info("supervisor_node: No findings to summarize")
             return {"final_report": empty_md}
 
+        # Truncate diff to avoid oversized prompts
+        MAX_DIFF_CHARS = 2000
+        truncated_diff = pr_diff[:MAX_DIFF_CHARS] + (
+            "... [truncated]" if len(pr_diff) > MAX_DIFF_CHARS else ""
+        )
+
         # Build the user prompt for the heavy model
         system_instructions = (
             "You are a professional GitHub code reviewer. Summarize the provided "
             "findings into a single, well-structured Markdown PR review."
         )
-
         user_prompt = (
             "Summarize inputs into a professional GitHub PR review (Markdown). "
             "Produce clear sections with emoji headings, short descriptive intro, "
@@ -127,9 +147,9 @@ def supervisor_node(state: AgentState) -> dict:
             "Eliminate duplicates and do NOT hallucinate: only include issues that "
             "are supported by the provided PR diff or by the agent findings. "
             "If a finding is uncertain, mark it as a suggestion and note uncertainty.\n\n"
-            "PR DIFF:\n" + pr_diff + "\n\n"
+            "PR DIFF:\n" + truncated_diff + "\n\n"
             "AGENT FINDINGS (deduplicated):\n"
-            + "\n".join(f"- {f}" for f in deduped)
+            + "\n".join(f"- [{f['category']}] {f['description']}" for f in deduped)
             + "\n\nRespond with final Markdown only (no extra commentary)."
         )
 
@@ -143,39 +163,50 @@ def supervisor_node(state: AgentState) -> dict:
         ]
 
         response = llm.invoke(messages)
-        final_report = getattr(response, "content", "") or response
+        try:
+            final_report = response.content
+        except AttributeError:
+            final_report = str(response)
 
         if not isinstance(final_report, str):
             final_report = str(final_report)
 
         # Basic sanity: ensure both required sections exist; if model omitted them,
         # create a safe fallback structure using the deduped lists.
-        if "Security/Logic" not in final_report and "Style" not in final_report:
+        # If either required section is missing, apply fallback formatting
+        if "Security/Logic" not in final_report or "Style" not in final_report:
             logger.warning(
                 "supervisor_node: Model output missing expected sections; applying fallback format"
             )
-            security_items = [
-                f
-                for f in deduped
-                if any(
-                    w in f.lower()
-                    for w in (
-                        "security",
-                        "vulner",
-                        "bug",
-                        "null",
-                        "crash",
-                        "race",
-                        "leak",
-                        "inject",
-                    )
-                )
+            # Improve categorization using a keyword regex with word boundaries
+            security_keywords = [
+                "security",
+                "vulner",
+                "bug",
+                "null",
+                "crash",
+                "race",
+                "leak",
+                "inject",
             ]
-            style_items = [f for f in deduped if f not in security_items]
+            security_pattern = re.compile(
+                r"\b(" + "|".join(security_keywords) + r")\b", re.IGNORECASE
+            )
+
+            security_items = [
+                f["description"]
+                for f in deduped
+                if security_pattern.search(f["description"])
+            ]
+            style_items = [
+                f["description"]
+                for f in deduped
+                if f["description"] not in security_items
+            ]
 
             parts = [
-                "# Automated PR Review\n",
-                "## Security/Logic Issues\n",
+                "# Automated PR Review 🧾\n",
+                "## ⚠️ Security/Logic Issues\n",
             ]
             if security_items:
                 parts.append("\n".join(f"- {s}" for s in security_items))
