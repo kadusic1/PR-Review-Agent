@@ -24,3 +24,8 @@ Focus on a **Supervisor Architecture** where an Orchestrator routes tasks to wor
   - Always minimize LOC and increase code readability so that everyone even at first glance
   understands it.
 
+## 6. Commit Suggestions
+  - **Trigger**: ONLY after generating code changes or performing file edits (Agent mode).
+  - **Behavior**: Automatically suggest a concise commit message at the end of the response.
+  - **Format**: Follow the Conventional Commits specification (e.g., `feat(scope): description` or `fix(scope): description`).
+  - **Constraint**: DO NOT suggest commit messages during general discussions, explanations, or in "ask mode" where no code was modified.
