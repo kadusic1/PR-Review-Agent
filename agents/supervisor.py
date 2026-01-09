@@ -123,6 +123,21 @@ def supervisor_node(state: AgentState) -> dict:
         all_findings = []
 
         def _ingest(source, category_name):
+            """
+            Normalize and collect findings from a source list into all_findings.
+
+            Args:
+                source (list): List of findings, each as a dict or string.
+                category_name (str): Category label to assign (e.g., "logic" or "style").
+
+            Returns:
+                None. Appends normalized findings as dicts to the all_findings list
+                in the parent scope.
+
+            Example:
+                _ingest([{"description": "Bug found."}, "- Use snake_case."], "logic")
+                # all_findings will have normalized dicts for each finding.
+            """
             for item in source:
                 if isinstance(item, dict):
                     desc = item.get("description") or item.get("text") or ""
