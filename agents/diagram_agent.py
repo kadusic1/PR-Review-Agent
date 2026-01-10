@@ -13,48 +13,14 @@ import logging
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from core.state import AgentState
+from utils.common import DIAGRAM_PROMPT
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 
-# ==================== DIAGRAM AGENT PROMPT ====================
-DIAGRAM_PROMPT = """You are an expert software architect and Mermaid JS diagram generator (Llama 3.3).
-
-Your sole objective is to analyze code changes and generate a VALID Mermaid class diagram
-that visualizes architectural changes.
-
-CRITICAL REQUIREMENTS:
-1. Output ONLY a single, complete Mermaid classDiagram code block.
-2. Analyze the git diff to identify:
-   - New classes or interfaces
-   - Modified class structures
-   - Relationship changes (inheritance, composition, dependencies)
-   - Key architectural patterns (if any)
-3. Generate syntactically correct Mermaid code that renders perfectly on GitHub.
-4. Use proper Mermaid syntax:
-   - class ClassName { ... }
-   - Relationships: <|-- (inheritance), --> (association), ..> (dependency)
-5. Include only architectural elements, not implementation details.
-6. Ensure proper nesting and syntax closure (no unclosed braces, proper formatting).
-
-OUTPUT FORMAT:
-```mermaid
-classDiagram
-    [Your diagram code here]
-```
-
-CONSTRAINTS:
-- Maximum 10-15 classes per diagram (focus on critical changes)
-- Avoid empty classes or trivial elements
-- Keep method/property names short and clear
-- If no significant architectural changes detected, generate a minimal diagram
-  showing the overall structure
-- NO explanatory text before or after the code block
-- NO comments inside the diagram code
-- Verify all parentheses, brackets, and braces are properly closed
-"""
+# DIAGRAM_PROMPT is defined in utils/common.py to keep prompts centralized
 
 
 def is_valid_mermaid_diagram(diagram_text: str) -> bool:
