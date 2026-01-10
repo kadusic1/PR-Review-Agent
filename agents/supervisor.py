@@ -31,48 +31,11 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+# Reuse the diagram validation from the diagram agent to avoid duplication
+from agents.diagram_agent import is_valid_mermaid_diagram
 
-def is_valid_mermaid(diagram: str) -> bool:
-    """
-    Validates that a diagram string contains valid Mermaid syntax.
-
-    Args:
-        diagram: The diagram string to validate.
-
-    Returns:
-        bool: True if the diagram appears to be valid Mermaid code.
-
-    Validation criteria:
-        - Contains 'classDiagram' or 'graph' keyword
-        - Has balanced braces
-        - Doesn't contain error patterns
-    """
-    if not diagram:
-        return False
-
-    # Check for diagram type
-    has_diagram_type = "classDiagram" in diagram or "graph" in diagram
-
-    # Count braces
-    open_braces = diagram.count("{")
-    close_braces = diagram.count("}")
-
-    if not has_diagram_type or open_braces != close_braces:
-        return False
-
-    # Check for error patterns
-    error_patterns = [
-        r"^Error:",
-        r"^I apologize",
-        r"^I cannot",
-        r"^I don't",
-    ]
-
-    for pattern in error_patterns:
-        if re.search(pattern, diagram, re.MULTILINE | re.IGNORECASE):
-            return False
-
-    return True
+# Backwards-compatible alias (tests and callers may import `is_valid_mermaid`)
+is_valid_mermaid = is_valid_mermaid_diagram
 
 
 def format_diagram_section(diagram: str) -> str:
