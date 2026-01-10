@@ -70,7 +70,7 @@ def make_initial_state(pr_diff: str = "", pr_url: str = "") -> AgentState:
         []
     """
     if pr_diff is None or pr_url is None:
-        raise ValueError('pr_diff and pr_url cannot be None')          
+        raise ValueError("pr_diff and pr_url cannot be None")
 
     return {
         "pr_diff": pr_diff,
