@@ -17,3 +17,4 @@ PyGithub~=2.4.0      # Za GitHub API
 pydantic~=2.9.0      # Za validaciju podataka (JSON output)
 python-dotenv~=1.0.0 # Za environment varijable
 requests~=2.31.0     # Za HTTP zahtjeve
+grandalf==0.8.1    # Za graf strukture i algoritme
