@@ -13,7 +13,7 @@ def main():
     """
     Entry point for GitHub Action.
     """
-    pr_url = os.getenv("PR_URL")
+    pr_url = os.getenv("PR_URLlll")
 
     if not pr_url:
         print("Error: PR_URL environment variable not set.")
