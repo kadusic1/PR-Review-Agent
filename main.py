@@ -24,7 +24,11 @@ def main():
 
     try:
         # 3. Dohvati Diff
-        diff_data = get_pr_diff(pr_url)
+        try:
+            diff_data = get_pr_diff(pr_url)
+        except Exception as e:
+            print(f"Error fetching PR diff: {e}")
+            sys.exit(1)
         pr_diff = diff_data.get("diff", "")
 
         if not pr_diff:
