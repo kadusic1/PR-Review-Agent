@@ -48,7 +48,7 @@ def main():
             # print(result["final_report"])
 
     except Exception as e:
-        print(f"❌ Critical Error in main executiiion: {e}")
+        print(f"❌ Critical Error in main execution: {e}")
         sys.exit(1)
 
 
