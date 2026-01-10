@@ -1,0 +1,23 @@
+name: AI PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run AI Agent Action
+        uses: ./ 
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          groq_api_key: ${{ secrets.GROQ_API_KEY }}
+          pr_url: ${{ github.event.pull_request.html_url }}

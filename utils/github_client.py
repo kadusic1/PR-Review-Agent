@@ -5,6 +5,7 @@ from github import Github
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 import logging
+from langchain_core.tools import tool
 
 
 load_dotenv()
@@ -53,6 +54,7 @@ def get_pr_diff(pr_url: str) -> dict:
         raise
 
 
+@tool
 def post_comment(pr_url: str, comment_body: str):
     """
     Posts a comment to a pull request using the GitHub API.

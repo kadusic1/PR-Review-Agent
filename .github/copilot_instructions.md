@@ -29,3 +29,17 @@ Focus on a **Supervisor Architecture** where an Orchestrator routes tasks to wor
   - **Behavior**: Automatically suggest a concise commit message at the end of the response.
   - **Format**: Follow the Conventional Commits specification (e.g., `feat(scope): description` or `fix(scope): description`).
   - **Constraint**: DO NOT suggest commit messages during general discussions, explanations, or in "ask mode" where no code was modified.
+
+## 7. File Editing & Standards
+- **Strict 80-Column Rule**: 
+    - Never exceed 80 characters per line.
+    - Wrap long function arguments, list comprehensions, and chained methods across
+    multiple lines with proper indentation.
+- **PEP 8 Mandate**: 
+    - Use `snake_case` for variables/functions and `CamelCase` for classes.
+    - Organize imports: Standard library first, third-party second, local imports last.
+    - Ensure 2 blank lines before top-level class/function definitions.
+
+## 8. Language Rule
+- ALWAYS use **English** for new code, comments or docstrings.
+- STRICT: No other languages are allowed!

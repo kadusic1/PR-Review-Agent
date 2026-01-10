@@ -1,0 +1,22 @@
+name: 'AI PR Reviewer Agent'
+description: 'Reviews Pull Requests using LangGraph Multi-Agent System'
+author: 'Adi Kadusic, Nejra Smajlovic'
+inputs:
+  github_token:
+    description: 'GitHub Token for accessing PRs'
+    required: true
+  groq_api_key:
+    description: 'Groq API Key for LLM'
+    required: true
+  pr_url:
+    description: 'The URL of the Pull Request'
+    required: true
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    # Prosljeđujemo inpute u environment varijable kontejnera
+    GITHUB_TOKEN: ${{ inputs.github_token }}
+    GROQ_API_KEY: ${{ inputs.groq_api_key }}
+    PR_URL: ${{ inputs.pr_url }}

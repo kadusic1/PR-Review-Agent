@@ -6,6 +6,7 @@ the multi-agent LangGraph workflow.
 
 from typing import Annotated, List, TypedDict
 import operator
+from langchain_core.messages import BaseMessage
 
 
 class AgentState(TypedDict):
@@ -42,9 +43,11 @@ class AgentState(TypedDict):
     logic_comments: Annotated[List[str], operator.add]
     style_comments: Annotated[List[str], operator.add]
     final_report: str
+    pr_url: str
+    messages: Annotated[List[BaseMessage], operator.add]
 
 
-def make_initial_state(pr_diff: str = "") -> AgentState:
+def make_initial_state(pr_diff: str = "", pr_url: str = "") -> AgentState:
     """Create a minimal AgentState with empty comment lists.
 
     This helper function initializes a clean state object with
@@ -66,9 +69,14 @@ def make_initial_state(pr_diff: str = "") -> AgentState:
         >>> s["style_comments"]
         []
     """
+    if pr_diff is None or pr_url is None:
+        raise ValueError("pr_diff and pr_url cannot be None")
+
     return {
         "pr_diff": pr_diff,
         "logic_comments": [],
         "style_comments": [],
         "final_report": "",
+        "pr_url": pr_url,
+        "messages": [],
     }
