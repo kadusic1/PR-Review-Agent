@@ -44,6 +44,7 @@ def build_graph():
     graph.add_conditional_edges(
         "supervisor", tools_condition, {"tools": "tools", END: END}
     )
+
     graph.add_edge("tools", END)
 
     app = graph.compile()

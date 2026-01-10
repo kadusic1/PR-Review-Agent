@@ -50,9 +50,7 @@ def logic_node(state: AgentState) -> dict:
 
         Apply the logic review guidelines and provide findings in JSON format."""
 
-        messages = [
-            {"role": "system", "content": LOGIC_PROMPT},
-            {"role": "user", "content": user_prompt},
+      
         ]
 
         response = llm.invoke(messages)
@@ -64,4 +62,4 @@ def logic_node(state: AgentState) -> dict:
     except Exception as e:
         logger.error(f"logic_node: Error during analysis - {e}")
         error_comment = f"**Logic Agent Error**: {str(e)}"
-        return {"logic_comments": [error_comment]}
+        return {"logic_comments": [error_    comment]}
