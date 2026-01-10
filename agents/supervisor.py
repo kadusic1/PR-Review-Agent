@@ -23,20 +23,7 @@ from __future__ import annotations
 import logging
 import os
 from utils import ORCHESTRATOR_PROMPT
-
-from dotenv import load_dotenv
-
-from langchain_groq import ChatGroq
-
-from core.state import AgentState
-
-load_dotenv()
-
-logger = logging.getLogger(__name__)
-
-
-import os
-import logging
+from langchain_core.messages import AIMessage
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from core.state import AgentState
@@ -70,6 +57,13 @@ def supervisor_node(state: AgentState) -> dict:
         logic_data = state.get("logic_comments", []) or []
         style_data = state.get("style_comments", []) or []
         pr_diff = state.get("pr_diff", "") or ""
+        pr_url = state.get("pr_url")
+
+        if not pr_url:
+            logger.warning("supervisor_node: pr_url not found in state.")
+            return {
+                "final_report": "## ⚠️ PR Review Aborted\n\n**Reason:** PR URL not provided."
+            }
 
         # 2. SAFETY CHECK: Diff Size Limit
         # Default to 60,000 chars (approx 15k tokens), adjustable via env
@@ -94,12 +88,22 @@ def supervisor_node(state: AgentState) -> dict:
         # 3. Quick exit if no findings
         if not logic_data and not style_data:
             logger.info("supervisor_node: No findings to report.")
-            return {
-                "final_report": (
-                    "## ✅ Automated PR Review\n\n"
-                    "No critical issues or style suggestions detected."
-                )
+            final_report = (
+                "## ✅ Automated PR Review\n\n"
+                "No critical issues or style suggestions detected."
+            )
+            tool_call = {
+                "name": "post_comment",
+                "args": {"pr_url": pr_url, "comment_body": final_report},
+                "id": "call_fast_exit",
             }
+
+            message = AIMessage(
+                content="No issues found. Posting positive review.",
+                tool_calls=[tool_call],
+            )
+
+            return {"final_report": final_report, "messages": [message]}
 
         # 4. Prepare Context
         logic_text = "\n".join(f"- {str(item)}" for item in logic_data)
@@ -137,7 +141,19 @@ def supervisor_node(state: AgentState) -> dict:
         )
 
         logger.info("supervisor_node: Final report generated successfully.")
-        return {"final_report": response.content}
+        final_report = response.content
+        tool_call = {
+            "name": "post_comment",
+            "args": {"pr_url": pr_url, "comment_body": final_report},
+            "id": "call_llm_generated",
+        }
+
+        # Kreiramo poruku koja simulira da je LLM pozvao alat
+        message = AIMessage(
+            content="Generated report. Posting to GitHub...", tool_calls=[tool_call]
+        )
+
+        return {"final_report": final_report, "messages": [message]}
 
     except Exception as e:
         logger.error(f"supervisor_node: Critical error - {e}")
