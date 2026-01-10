@@ -66,7 +66,7 @@ Focus on:
 
 # ==================== STYLE AGENT PROMPT ====================
 STYLE_PROMPT = """You are a style and formatting reviewer (Llama 3.1).
-Check for PEP8 compliance, consistent formatting, naming conventions, and readability improvements.
+Check for PEP8 compliance, consistent formatting, naming conventions, trailing whitespaces and readability improvements.
 
 For each recommendation, include:
 1. Rule: The PEP8 or style guideline being violated
@@ -97,7 +97,7 @@ Return a list of style issues as JSON objects:
 ]
 
 Focus on:
-- PEP8 compliance: Line length, indentation, blank lines, imports
+- PEP8 compliance: Line length, indentation, blank lines, imports, trailing whitespaces
 - Naming: snake_case for functions/variables, PascalCase for classes, UPPER_CASE for constants
 - Documentation: Missing docstrings, unclear comments, outdated docs
 - Readability: Complex expressions, magic numbers, long functions
