@@ -69,6 +69,9 @@ def make_initial_state(pr_diff: str = "", pr_url: str = "") -> AgentState:
         >>> s["style_comments"]
         []
     """
+    if pr_diff is None or pr_url is None:
+        raise ValueError('pr_diff and pr_url cannot be None')          
+
     return {
         "pr_diff": pr_diff,
         "logic_comments": [],
