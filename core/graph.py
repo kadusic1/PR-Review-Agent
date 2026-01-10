@@ -5,6 +5,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from core.state import AgentState
 from agents.logic_agent import logic_node
 from agents.style_agent import style_node
+from agents.diagram_agent import diagram_node
 from agents.supervisor import supervisor_node
 from utils import post_comment
 
@@ -29,21 +30,28 @@ def build_graph():
     # Initialize the state graph
     graph = StateGraph(AgentState)
 
-    # Add nodes
+    # Add nodes (all agents run in parallel)
     graph.add_node("logic", logic_node)
     graph.add_node("style", style_node)
+    graph.add_node("diagram", diagram_node)
     graph.add_node("supervisor", supervisor_node)
     graph.add_node("tools", ToolNode([post_comment]))
 
-    # Add edges
+    # Entry points: All three agents start in parallel
     graph.add_edge("__start__", "logic")
     graph.add_edge("__start__", "style")
+    graph.add_edge("__start__", "diagram")
+
+    # All agents converge to supervisor
     graph.add_edge("logic", "supervisor")
     graph.add_edge("style", "supervisor")
-    # Add conditional edge based on supervisor output
+    graph.add_edge("diagram", "supervisor")
+
+    # Supervisor → tools or END based on findings
     graph.add_conditional_edges(
         "supervisor", tools_condition, {"tools": "tools", END: END}
     )
+
     graph.add_edge("tools", END)
 
     app = graph.compile()
