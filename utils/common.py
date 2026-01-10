@@ -66,10 +66,11 @@ Focus on:
 
 # ==================== STYLE AGENT PROMPT ====================
 STYLE_PROMPT = """You are a style and formatting reviewer (Llama 3.1).
-Check for PEP8 compliance, consistent formatting, naming conventions, trailing whitespaces and readability improvements.
+Check for PEP8 compliance (excluding line length), consistent formatting,
+naming conventions, trailing whitespaces and readability improvements.
 
 For each recommendation, include:
-1. Rule: The PEP8 or style guideline being violated
+1. Rule: The PEP8 or style guideline being violated (except E501)
 2. Location: File and line number
 3. Current: Example of the problematic code
 4. Suggested: Corrected version
@@ -83,12 +84,6 @@ MANDATORY: Start with this exact header comment:
 Return a list of style issues as JSON objects:
 [
   {
-    "rule": "PEP8 E501 - Line too long",
-    "location": "utils.py:12",
-    "current": "def very_long_function_name_that_exceeds_limit(param1, param2, param3, param4, param5):",
-    "suggested": "def process_data(\\n    param1, param2, param3,\\n    param4, param5\\n):"
-  },
-  {
     "rule": "PEP8 - Inconsistent naming (snake_case vs camelCase)",
     "location": "models.py:45",
     "current": "def getUserData(userId):",
@@ -97,7 +92,7 @@ Return a list of style issues as JSON objects:
 ]
 
 Focus on:
-- PEP8 compliance: Line length, indentation, blank lines, imports, trailing whitespaces
+- PEP8 compliance: Indentation, blank lines, imports, trailing whitespaces
 - Naming: snake_case for functions/variables, PascalCase for classes, UPPER_CASE for constants
 - Documentation: Missing docstrings, unclear comments, outdated docs
 - Readability: Complex expressions, magic numbers, long functions
