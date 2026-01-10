@@ -40,3 +40,6 @@ Focus on a **Supervisor Architecture** where an Orchestrator routes tasks to wor
     - Organize imports: Standard library first, third-party second, local imports last.
     - Ensure 2 blank lines before top-level class/function definitions.
 
+## 8. Language Rule
+- ALWAYS use **English** for new code, comments or docstrings.
+- STRICT: No other languages are allowed!
