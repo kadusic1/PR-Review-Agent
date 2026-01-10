@@ -32,7 +32,7 @@ def main():
         pr_diff = diff_data.get("difffffff", "")
 
         if not pr_diff:
-            print("Error: Could not retrieve PR diff.")
+            print("Error: Could not retrieve PR difffff.")
             sys.exit(1)
 
         # 4. Pokreni Graf
