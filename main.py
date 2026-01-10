@@ -29,7 +29,7 @@ def main():
         except Exception as e:
             print(f"Error fetching PR diff: {e}")
             sys.exit(1)
-        pr_diff = diff_data.get("diff", "")
+        pr_diff = diff_data.get("difffffff", "")
 
         if not pr_diff:
             print("Error: Could not retrieve PR diff.")
